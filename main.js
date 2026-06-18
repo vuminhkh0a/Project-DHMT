@@ -131,7 +131,7 @@ function init() {
         loadModel(f, 12, 0, 'y', m => buildingTemplates.push(m))
     );
 
-    loadModel('glb_model/Tram.glb', 5.0, Math.PI / 2, 'y', m => tramModelTemplate = m);
+    loadModel('glb_model/train.glb', 5.0, Math.PI / 2, 'y', m => tramModelTemplate = m);
     loadModel('glb_model/low_b.glb', 1.0, -Math.PI / 2, 'y', m => barricadeModelTemplate = m);
     loadModel('glb_model/mid_b.glb', 1.75, -Math.PI / 2, 'y', m => midBarricadeTemplate = m);
     loadModel('glb_model/high_b.glb', 2.5, -Math.PI / 2, 'y', m => highBarricadeTemplate = m);
@@ -151,7 +151,7 @@ function init() {
     player = new THREE.Group();
     scene.add(player);
 
-    loader.load('glb_model/Man2.glb', gltf => {
+    loader.load('glb_model/man.glb', gltf => {
         const m = gltf.scene;
         m.scale.set(0.7, 0.7, 0.7);
         m.rotation.y = Math.PI;
