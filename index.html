@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Load Model Man.glb</title>
+    <title>Chạy Tàu - Endless Runner 3D</title>
     <style>
+        /* 1. CSS cơ bản: 
+           Xóa margin mặc định và ẩn thanh cuộn (overflow: hidden) 
+           để Canvas chiếm trọn vẹn màn hình mà không bị xê dịch.
+        */
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
     </style>
-    <!-- Cấu hình Import Map để trình duyệt hiểu import * as THREE -->
     <script type="importmap">
         {
             "imports": {
@@ -19,8 +22,6 @@
     </script>
 </head>
 <body>
-    <!-- Import file main.js của bạn -->
     <script type="module" src="main.js"></script>
 </body>
 </html>
-
