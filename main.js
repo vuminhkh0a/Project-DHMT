@@ -1,7 +1,8 @@
 // 1. IMPORT THƯ VIỆN
 // Sử dụng CDN để tải các module của Three.js
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158/build/three.module.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.158/examples/jsm/loaders/GLTFLoader.js';
+// 1. IMPORT THƯ VIỆN
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // 2. KHAI BÁO CÁC THỰC THỂ (ENTITIES) CƠ BẢN
 // Kiến thức ĐHMT: Bất kỳ ứng dụng 3D nào cũng cần 3 yếu tố cốt lõi: 
@@ -15,6 +16,10 @@ let lane = 0; // Trục X phân làn (-2, 0, 2)
 let score = 0;
 let scoreDiv;
 let gameRunning = true;
+
+// Các biến quản lý Animation cho Model
+let mixer; // Quản lý hoạt ảnh (Animation)
+const clock = new THREE.Clock(); // Đồng hồ đếm thời gian thực cho Animation
 
 // Các biến lưu trữ Template (Bản mẫu) của Model 3D để nhân bản (Clone)
 let tramModelTemplate = null;
@@ -221,42 +226,49 @@ function init() {
     scene.add(player);
 
     loader.load(
-        'glb_model/Man.glb',
-        function (gltf) {
-            const model = gltf.scene;
-            const targetPlayerHeight = 1.8;
-            const box = new THREE.Box3().setFromObject(model);
-            const size = new THREE.Vector3();
-            box.getSize(size);
-            const scaleFactor = targetPlayerHeight / size.y;
-            
-            model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            model.rotation.y = Math.PI;
-            
-            const newBox = new THREE.Box3().setFromObject(model);
-            model.position.y -= newBox.min.y;
+            'glb_model/Man2.glb',
+            function (gltf) {
+                const model = gltf.scene;
 
-            model.traverse(function (child) {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
+                let s = 0.5
+                model.scale.set(s, s, s);
+                model.rotation.y = Math.PI;
+
+                const box = new THREE.Box3().setFromObject(model);
+                model.position.set(0, -box.min.y, 0);
+                model.position.set(0, 0, 0);
+
+                model.traverse(function (child) {
+                    if (child.isMesh || child.isSkinnedMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                        child.frustumCulled = false; 
+
+                        if (child.material) {
+                            const materials = Array.isArray(child.material) ? child.material : [child.material];
+                            materials.forEach(mat => {
+                                mat.transparent = false; 
+                                mat.depthWrite = true;
+                                mat.alphaTest = 0.5;
+                            });
+                        }
+                    }
+                });
+
+                // 4. CHẠY ANIMATION
+                if (gltf.animations && gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(model);
+                    const runAction = mixer.clipAction(gltf.animations[0]);
+                    runAction.play();
                 }
-            });
-            player.add(model);
-        },
-        undefined,
-        function (error) {
-            // Fallback (Phương án dự phòng) nếu lỗi load file
-            const fallbackMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 2, 1),
-                new THREE.MeshStandardMaterial({ color: 0xff0000 })
-            );
-            fallbackMesh.castShadow = true;
-            fallbackMesh.receiveShadow = true;
-            fallbackMesh.position.y = 1;
-            player.add(fallbackMesh);
-        }
-    );
+
+                player.add(model);
+            },
+            undefined,
+            function (error) {
+                console.error("LỖI KHÔNG THỂ LOAD MODEL:", error);
+            }
+        );
 
     // Load Tàu, Rào thấp, Rào cao, Đường ray...
     loader.load('glb_model/Tram.glb', function (gltf) {
@@ -494,6 +506,10 @@ function animate() {
     requestAnimationFrame(animate);
 
     if (!gameRunning) return;
+
+    // CẬP NHẬT ANIMATION MODEL CHO MỖI FRAME
+    const delta = clock.getDelta();
+    if (mixer) mixer.update(delta);
 
     nextLeftBuildingZ += speed;
     nextRightBuildingZ += speed;
