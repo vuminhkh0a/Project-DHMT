@@ -235,7 +235,6 @@ function init() {
                 model.rotation.y = Math.PI;
 
                 const box = new THREE.Box3().setFromObject(model);
-                model.position.set(0, -box.min.y, 0);
                 model.position.set(0, 0, 0);
 
                 model.traverse(function (child) {
