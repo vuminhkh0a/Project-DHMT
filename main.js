@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-// Global declarations for Scene Graph components, state management, and 3D asset templates.
 let scene, camera, renderer;
 let player, obstacles = [], buildings = [], rails = []; 
-let speed = 0.25;
+let speed = 0.35;
 let lane = 0; 
 let score = 0;
 let scoreDiv;
@@ -38,7 +37,6 @@ let nextRightBuildingZ = 20;
 init();
 animate();
 
-// Initializes WebGL context, Scene Graph (PBR & Shadow Mapping), lighting, and asset loading.
 function init() {
     scene = new THREE.Scene();
     scene.background = nightSkyColor.clone();
@@ -88,10 +86,14 @@ function init() {
     }
     scene.add(clouds);
 
+    const textureLoader = new THREE.TextureLoader();
+    const moonTexture = textureLoader.load('texture_moon.jpg');
+    const sunTexture = textureLoader.load('texture_sun.jpg');
+
     const celestialGeometry = new THREE.SphereGeometry(4, 16, 16);
-    moonSphere = new THREE.Mesh(celestialGeometry, new THREE.MeshBasicMaterial({ color: 0xffffe0 }));
+    moonSphere = new THREE.Mesh(celestialGeometry, new THREE.MeshBasicMaterial({ color: 0xffffe0, map: moonTexture }));
     scene.add(moonSphere);
-    sunSphere = new THREE.Mesh(celestialGeometry, new THREE.MeshBasicMaterial({ color: 0xfff5b6 }));
+    sunSphere = new THREE.Mesh(celestialGeometry, new THREE.MeshBasicMaterial({ color: 0xfff5b6, map: sunTexture }));
     scene.add(sunSphere);
 
     mainLight = new THREE.DirectionalLight(0xffffff, 1); 
@@ -259,7 +261,6 @@ function spawnRails() {
     });
 }
 
-// Terminates rendering loop and generates DOM-based GUI overlay for the state boundary.
 function showGameOver() {
     gameRunning = false;
     const overlay = document.createElement('div');
